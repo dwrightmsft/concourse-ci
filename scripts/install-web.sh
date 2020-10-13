@@ -6,6 +6,7 @@ PSQLNAME=$4
 PSQLFQDN=$5
 CONCOURSEUSER=$6
 CONCOURSEPW=$7
+APPGWIP=$8
 
 # Download Concourse
 wget -O concourse.tgz "$CONCOURSEURL"
@@ -30,6 +31,7 @@ cat > /etc/concourse/web_environment << EOF
     CONCOURSE_POSTGRES_DATABASE=concourse
     CONCOURSE_MAIN_TEAM_LOCAL_USER=admin
     CONCOURSE_POSTGRES_SSLMODE=require
+    CONCOURSE_EXTERNAL_URL=http://$APPGWIP
 EOF
 mkdir /var/lib/concourse
 adduser --system --group concourse
