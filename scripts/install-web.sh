@@ -18,7 +18,7 @@ cp /etc/concourse/worker_key.pub /etc/concourse/authorized_worker_keys
 
 apt update -y
 apt install -y postgresql-client
-PGPASSWORD=$PSQLPASSWORD psql -h $PSQLHOST -U $PSQLUSER -d postgres -w -c "CREATE DATABASE concourse;"
+PGPASSWORD=$PSQLPASSWORD psql -h $PSQLFQDN -U $PSQLUSER -d postgres -w -c "CREATE DATABASE concourse;"
 cat > /etc/concourse/web_environment << EOF    
     CONCOURSE_ADD_LOCAL_USER=$CONCOURSEUSER:$CONCOURSEPW
     CONCOURSE_SESSION_SIGNING_KEY=/etc/concourse/session_signing_key
@@ -35,4 +35,20 @@ mkdir /var/lib/concourse
 adduser --system --group concourse
 chown -R concourse:concourse /etc/concourse /var/lib/concourse
 chmod 600 /etc/concourse/*_environment
-fi
+
+cat > /etc/systemd/system/concourse-web.service << EOF
+[Unit]
+Description=Concourse CI web process (ATC and TSA)
+
+[Service]
+User=concourse
+Restart=on-failure
+EnvironmentFile=/etc/concourse/web_environment
+ExecStart=/usr/local/concourse/bin/concourse web
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl start concourse-web
+systemctl enable concourse-web
