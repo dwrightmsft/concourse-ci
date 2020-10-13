@@ -23,13 +23,6 @@
                 "description": "Deploy Azure Bastion for VM console access"
             }
         },
-        "location": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().location]",
-            "metadata": {
-                "description": "Location for all resources."
-            }
-        },
         "psqlServerNamePrefix": {
             "type": "string",
             "defaultValue": "concourse",
@@ -125,7 +118,7 @@
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2020-05-01",
             "name": "appGateway",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "properties": {
                 "securityRules": [
                     {
@@ -177,7 +170,7 @@
             "name": "bastion",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2020-05-01",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "properties": {
                 "securityRules": [
                     {
@@ -252,7 +245,7 @@
             "name": "[parameters('vnetName')]",
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2019-11-01",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups', 'appGateway')]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', 'bastion')]"
@@ -304,7 +297,7 @@
             "condition": "[parameters('deployBastion')]",
             "apiVersion": "2020-05-01",
             "name": "bastion",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "sku": {
                 "name": "Standard"
             },
@@ -320,7 +313,7 @@
             "condition": "[parameters('deployBastion')]",
             "type": "Microsoft.Network/bastionHosts",
             "apiVersion": "2020-05-01",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', 'bastion')]",
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
@@ -346,7 +339,7 @@
             "type": "Microsoft.DBforPostgreSQL/servers",
             "apiVersion": "2017-12-01",
             "name": "[variables('psqlServerName')]",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
             ],
@@ -418,7 +411,7 @@
             "name": "web",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-07-01",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', 'web')]"
             ],
@@ -527,7 +520,7 @@
             "name": "[concat('worker', copyindex(1))]",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-07-01",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkInterfaces/', concat('worker', copyindex(1)))]"
             ],
@@ -614,7 +607,7 @@
             "type": "Microsoft.Network/applicationGateways",
             "apiVersion": "2020-05-01",
             "name": "concourseAppGateway",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses/', 'concourseAppGateway')]",
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
