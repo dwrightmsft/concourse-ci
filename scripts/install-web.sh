@@ -55,9 +55,9 @@ EOF
 systemctl start concourse-web
 systemctl enable concourse-web
 
-echo ###START-TSA-PUBLIC-KEY###
+echo "###START-TSA-PUBLIC-KEY###"
 cat /etc/concourse/tsa_host_key.pub
-echo ###END-TSA-PUBLIC-KEY###
-echo ###START-TSAWORKER-PRIVATE-KEY###
+echo "###END-TSA-PUBLIC-KEY###"
+echo "###START-TSAWORKER-PRIVATE-KEY###"
 cat /etc/concourse/worker_key
-echo ###End-TSAWORKER-PRIVATE-KEY###
+echo "###END-TSAWORKER-PRIVATE-KEY###"
