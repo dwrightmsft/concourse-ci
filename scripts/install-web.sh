@@ -18,7 +18,7 @@ cp /etc/concourse/worker_key.pub /etc/concourse/authorized_worker_keys
 
 apt update -y
 apt install -y postgresql-client
-PGPASSWORD=$PSQLPASSWORD psql -h $PSQLFQDN -U $PSQLUSER -d postgres -w -c "CREATE DATABASE concourse;"
+PGPASSWORD=$PSQLPASSWORD psql -h $PSQLFQDN -U $PSQLUSER@$PSQLNAME -d postgres -w -c "CREATE DATABASE concourse;"
 cat > /etc/concourse/web_environment << EOF    
     CONCOURSE_ADD_LOCAL_USER=$CONCOURSEUSER:$CONCOURSEPW
     CONCOURSE_SESSION_SIGNING_KEY=/etc/concourse/session_signing_key
