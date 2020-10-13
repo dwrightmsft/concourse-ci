@@ -1,4 +1,4 @@
 #!/bin/bash
 SCRIPTOUTPUT=$1
 
-echo $SCRIPTOUTPUT > scriptoutput.txt
+echo "$SCRIPTOUTPUT" | base64 -d > script.out
