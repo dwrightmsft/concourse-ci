@@ -9,8 +9,15 @@ wget -O concourse.tgz "$CONCOURSEURL"
 tar xvzf concourse.tgz -C /usr/local
 mkdir /etc/concourse
 
+parted --script /dev/disk/azure/scsi1/lun0 mklabel gpt mkpart primary ext4 1MiB 100%
+partprobe
+mkfs.ext4 /dev/disk/azure/scsi1/lun0-part1
+echo "/dev/disk/azure/scsi1/lun0-part1  /opt    ext4    defaults    0 2" >> /etc/fstab
+mount -a
+mkdir -p /opt/concourse/worker
+
 cat > /etc/concourse/worker_environment << EOF
-CONCOURSE_WORK_DIR=/var/lib/concourse
+CONCOURSE_WORK_DIR=/opt/concourse/worker
 CONCOURSE_TSA_HOST=$WEBIP:2222
 CONCOURSE_TSA_PUBLIC_KEY=/etc/concourse/tsa_host_key.pub
 CONCOURSE_TSA_WORKER_PRIVATE_KEY=/etc/concourse/worker_key
