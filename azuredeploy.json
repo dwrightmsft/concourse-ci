@@ -111,7 +111,8 @@
         "resgpguid": "[substring(replace(guid(resourceGroup().id), '-', ''), 0, 4)]",
         "psqlServerName": "[concat(parameters('psqlServerNamePrefix'), variables('resgpguid'))]",
         "concourseDownload": "https://github.com/concourse/concourse/releases/download/v6.6.0/concourse-6.6.0-linux-amd64.tgz",
-        "installScript": "https://raw.githubusercontent.com/dwrightmsft/concourse-ci/main/scripts/install-web.sh"
+        "webInstallScript": "https://raw.githubusercontent.com/dwrightmsft/concourse-ci/main/scripts/install-web.sh",
+        "workerInstallScript": "https://raw.githubusercontent.com/dwrightmsft/concourse-ci/main/scripts/install-worker.sh"
     },
     "resources": [
         {
@@ -477,7 +478,7 @@
                         "autoUpgradeMinorVersion": true,
                         "settings": {
                             "fileUris": [
-                                "[variables('installScript')]"
+                                "[variables('webInstallScript')]"
                             ]
                         },
                         "protectedSettings": {
@@ -554,7 +555,7 @@
                     },
                     "dataDisks": [
                         {
-                            "name": "[concat('worker', copyindex(), '-DataDisk')]",
+                            "name": "[concat('worker', copyindex(1), '-DataDisk')]",
                             "caching": "ReadWrite",
                             "createOption": "Empty",
                             "lun": 0,
@@ -586,7 +587,33 @@
                         }
                     ]
                 }
-            }
+            },
+            "resources": [
+                {
+                    "apiVersion": "2019-07-01",
+                    "type": "extensions",
+                    "name": "install-concourse-worker",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', 'worker', copyindex(1))]",
+                        "[resourceId('Microsoft.Compute/virtualMachines/extensions', 'web', 'install-concourse-web')]"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.Azure.Extensions",
+                        "type": "CustomScript",
+                        "typeHandlerVersion": "2.1",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "fileUris": [
+                                "[variables('workerInstallScript')]"
+                            ]
+                        },
+                        "protectedSettings": {
+                            "commandToExecute": "[concat('sudo bash install-worker.sh ', base64(reference(resourceId('Microsoft.Compute/virtualMachines/extensions', 'web', 'install-concourse-web'), '2019-07-01').instanceView.statuses[0].message), ' ', variables('concourseDownload'), ' ', reference(resourceId('Microsoft.Network/networkInterfaces', 'web'), '2020-05-01').ipConfigurations[0].properties.privateIPAddress)]"
+                        }
+                    }
+                }
+            ]
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
@@ -700,5 +727,10 @@
             }
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "scriptOutput": {
+            "type": "object",
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/extensions', 'web', 'install-concourse-web'), '2019-07-01').instanceView]"
+        }
+    }
 }
